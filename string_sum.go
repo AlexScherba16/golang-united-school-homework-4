@@ -2,6 +2,9 @@ package string_sum
 
 import (
 	"errors"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 //use these errors as appropriate, wrapping them with fmt.Errorf function
@@ -22,6 +25,58 @@ var (
 //
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
+func checkExpressionValidity(input string) (string, error) {
+	trimmed := strings.Replace(input, " ", "", -1)
+
+	// check for whitespaces only
+	if len(trimmed) == 0 {
+		return "", errorEmptyInput
+	}
+
+	// check chars
+	charsRe := regexp.MustCompile("[A-Za-z]+")
+	values := charsRe.FindAllString(input, -1)
+	if len(values) != 0 {
+		return "", errorNotTwoOperands
+	}
+
+	return trimmed, nil
+}
+
+func sumStringValues(values []string) (int64, error) {
+	var result int64 = 0
+	for _, v := range values {
+		value, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return 0, err
+		}
+		result += value
+	}
+	return result, nil
+}
+
 func StringSum(input string) (output string, err error) {
-	return "", nil
+	validated, err := checkExpressionValidity(input)
+	if err != nil {
+		return "", err
+	}
+
+	var result int64
+	allValues := regexp.MustCompile("\\d+").FindAllString(validated, -1)
+	negativeValues := regexp.MustCompile("(-)\\d+").FindAllString(validated, -1)
+
+	counted, err := sumStringValues(allValues)
+	if err != nil {
+		return "", err
+	}
+
+	result = counted
+
+	counted, err = sumStringValues(negativeValues)
+	if err != nil {
+		return "", err
+	}
+
+	result += counted * 2
+	return strconv.FormatInt(result, 10), nil
 }
