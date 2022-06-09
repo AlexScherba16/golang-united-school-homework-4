@@ -2,6 +2,7 @@ package string_sum
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -30,14 +31,16 @@ func checkExpressionValidity(input string) (string, error) {
 
 	// check for whitespaces only
 	if len(trimmed) == 0 {
-		return "", errorEmptyInput
+		err := fmt.Errorf("bad token nil. %w", errorEmptyInput)
+		return "", err
 	}
 
 	// check chars
 	charsRe := regexp.MustCompile("[A-Za-z]+")
 	values := charsRe.FindAllString(input, -1)
 	if len(values) != 0 {
-		return "", errorNotTwoOperands
+		err := fmt.Errorf("chars in input string. %w", errorNotTwoOperands)
+		return "", err
 	}
 
 	return trimmed, nil
