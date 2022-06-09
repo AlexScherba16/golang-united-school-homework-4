@@ -26,60 +26,66 @@ var (
 //
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
-func checkExpressionValidity(input string) (string, error) {
-	trimmed := strings.Replace(input, " ", "", -1)
-
-	// check for whitespaces only
-	if len(trimmed) == 0 {
-		err := fmt.Errorf("bad token nil. %w", errorEmptyInput)
-		return "", err
-	}
-
-	// check chars
-	charsRe := regexp.MustCompile("[A-Za-z]+")
-	values := charsRe.FindAllString(input, -1)
-	if len(values) != 0 {
-		err := fmt.Errorf("chars in input string. %w", errorNotTwoOperands)
-		return "", err
-	}
-
-	return trimmed, nil
-}
-
-func sumStringValues(values []string) (int64, error) {
-	var result int64 = 0
-	for _, v := range values {
-		value, err := strconv.ParseInt(v, 10, 64)
-		if err != nil {
-			return 0, err
-		}
-		result += value
-	}
-	return result, nil
-}
-
 func StringSum(input string) (output string, err error) {
-	validated, err := checkExpressionValidity(input)
-	if err != nil {
+	if input == "" {
+		err := fmt.Errorf("bad token nil. %w", errorEmptyInput)
+		fmt.Println(err.Error())
 		return "", err
 	}
-
-	var result int64
-	allValues := regexp.MustCompile("\\d+").FindAllString(validated, -1)
-	negativeValues := regexp.MustCompile("(-)\\d+").FindAllString(validated, -1)
-
-	counted, err := sumStringValues(allValues)
-	if err != nil {
+	input = strings.ReplaceAll(input, " ", "")
+	re := regexp.MustCompile(`[\+\-]*[0-9]+`)
+	n := re.FindAllString(input, -1)
+	res := regexp.MustCompile(`[\^+\^-]*[^0-9]+`)
+	fmt.Println(res.FindAllString(input, -1))
+	n0 := res.FindAllString(input, -1)
+	res0 := regexp.MustCompile(`[\+\-]+`)
+	fmt.Println(res0.FindAllString(input, -1))
+	n1 := res0.FindAllString(input, -1)
+	res1 := regexp.MustCompile(`[a-zA-Zа-яА-Я]*[0-9]+[a-zA-Zа-яА-Я]+`)
+	fmt.Println("n2=", res1.FindAllString(input, -1))
+	n2 := res1.FindAllString(input, -1)
+	if len(n) == 0 && len(n0) > 0 {
+		err := fmt.Errorf("\n Ошибка пустое значение: %w", errorEmptyInput)
+		fmt.Println(err.Error())
 		return "", err
 	}
+	if len(n) == 1 {
+		err := fmt.Errorf("\n Ошибка одно значение: %w", errorNotTwoOperands)
+		if err != nil {
+			fmt.Println(err.Error())
+			return "", err
+		}
 
-	result = counted
-
-	counted, err = sumStringValues(negativeValues)
-	if err != nil {
+	}
+	if len(n) > 2 {
+		err := fmt.Errorf("\n Ошибка введено больше двух значений: %w", errorNotTwoOperands)
+		fmt.Println(err.Error())
 		return "", err
 	}
+	if len(n1) > 2 {
+		err := fmt.Errorf("\n Ошибка введено больше двух значений: %w", errorNotTwoOperands)
+		fmt.Println(err.Error())
+		return "", err
+	}
+	if len(n2) > 0 {
+		_, e := strconv.Atoi(n2[0])
+		err := fmt.Errorf("bad token. %w", e)
+		if err != nil {
+			fmt.Println(err.Error())
+			return "", err
+		}
+	}
+	var y int = 0
+	for _, r := range n {
+		y0, err := strconv.Atoi(r)
+		if err != nil {
+			err = fmt.Errorf("%w", err)
+			fmt.Println(err.Error())
+			return "", err
+		}
+		y = y + y0
+	}
+	output = strconv.Itoa(y)
+	return output, nil
 
-	result += counted * 2
-	return strconv.FormatInt(result, 10), nil
 }
